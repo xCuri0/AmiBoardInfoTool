@@ -282,8 +282,8 @@ UINT8 injectDSDTintoAmiboardInfo(std::vector<unsigned char> ami, std::vector<uns
     if (needsCodePatching) {
         printf(" * Patching addresses in code\n");
         const static UINT32 MAX_INSTRUCTIONS = 1000;
-        _DInst decomposed[MAX_INSTRUCTIONS];
-        _DecodedInst disassembled[MAX_INSTRUCTIONS];
+        _DInst *decomposed = (_DInst*)malloc(sizeof(_DInst) * MAX_INSTRUCTIONS);
+        _DecodedInst *disassembled = (_DecodedInst*)malloc(sizeof(_DecodedInst) * MAX_INSTRUCTIONS);
         _DecodeResult res, res2;
         _CodeInfo ci = { (_DecodeType)0, (_DecodeType)0, (_DecodeType)0, (_DecodeType)0, Decode64Bits, (_DecodeType)0 };
         ci.codeOffset = HeaderNT->OptionalHeader.BaseOfCode;
@@ -295,6 +295,10 @@ UINT8 injectDSDTintoAmiboardInfo(std::vector<unsigned char> ami, std::vector<uns
         UINT32 decodedInstructionsCount = 0;
         UINT32 patchCount = 0;
 
+        if (!decomposed || !disassembled) {
+            printf("ERROR: malloc failure! Aborting!\n");
+            return ERR_ERROR;
+        }
         /* Actual disassembly */
         res = distorm_decode(ci.codeOffset,
             ci.code,

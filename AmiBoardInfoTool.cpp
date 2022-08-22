@@ -126,7 +126,7 @@ UINT8 injectDSDTintoAmiboardInfo(std::vector<unsigned char> ami, std::vector<uns
     newDSDTsize = dsdtbuf.size();
     diffDSDT = newDSDTsize - oldDSDTsize;
 
-    if (diffDSDT != 0) {
+    if (diffDSDT <= 0) {
         printf("Info: New DSDT is not larger than old one, no need to patch anything :)\n");
         UINT32 padbytes = (diffDSDT * (-1)); // negative val -> positive
 

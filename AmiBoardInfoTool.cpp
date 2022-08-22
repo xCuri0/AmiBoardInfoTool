@@ -126,7 +126,6 @@ UINT8 injectDSDTintoAmiboardInfo(std::vector<unsigned char> ami, std::vector<uns
     newDSDTsize = dsdtbuf.size();
     diffDSDT = newDSDTsize - oldDSDTsize;
 
-    printf("newDsdt %lu oldDsdt %lu diffDsdt %lu\n", newDSDTsize, oldDSDTsize, diffDSDT);
     if (diffDSDT != 0) {
         printf("Info: New DSDT is not larger than old one, no need to patch anything :)\n");
         UINT32 padbytes = (diffDSDT * (-1)); // negative val -> positive
@@ -271,7 +270,7 @@ UINT8 injectDSDTintoAmiboardInfo(std::vector<unsigned char> ami, std::vector<uns
             for (int j = 0; j < logicalEntries; j++) {
                 printf(" - Relocation: %X\n", j);
 
-                RELOCATION_ENTRIES[j].offset += alignDiffDSDT;
+                RELOCATION_ENTRIES[j].offset += (UINT16)alignDiffDSDT;
                 printf("\tOffset: %X --> %X\n",
                     (UINT16)(RELOCATION_ENTRIES[j].offset - alignDiffDSDT),
                     RELOCATION_ENTRIES[j].offset);
@@ -321,7 +320,7 @@ UINT8 injectDSDTintoAmiboardInfo(std::vector<unsigned char> ami, std::vector<uns
             if ((decomposed[i].disp < (UINT64)offset) || decomposed[i].disp > (MAX_DSDT & 0xFF000))
                 continue;
 
-            UINT32 patchOffset = (decomposed[i].addr - ci.codeOffset) + 3;
+            UINT32 patchOffset = (UINT32)(decomposed[i].addr - ci.codeOffset) + 3;
             UINT32* patchValue = (UINT32*)&ci.code[patchOffset];
 
             printf("offset: %08X: %s%s%s ",
@@ -342,7 +341,7 @@ UINT8 injectDSDTintoAmiboardInfo(std::vector<unsigned char> ami, std::vector<uns
             return ERR_ERROR;
         }
 
-        printf("Patched %i instructions\n", patchCount);
+        printf("Patched %lu instructions\n", patchCount);
     }
 
     out.resize(offset);
@@ -381,7 +380,7 @@ std::vector<unsigned char> readFile(const char* filename)
 
     // reserve capacity
     std::vector<unsigned char> vec;
-    vec.reserve(fileSize);
+    vec.reserve((unsigned int)fileSize);
 
     // read the data:
     vec.insert(vec.begin(),
@@ -443,7 +442,6 @@ int main(int argc, char* argv[])
             return ret;
         }
 
-        printf("%lu dsdtsize\n", dsdtBuffer.size());
         //write DSDT
         std::ofstream dsdtOut(dsdtPath, std::ios::binary);
         copy(dsdtBuffer.cbegin(), dsdtBuffer.cend(), std::ostreambuf_iterator<char>(dsdtOut));

@@ -411,6 +411,13 @@ char* getCmdOption(char** begin, char** end, const std::string& option)
     return 0;
 }
 
+void printUsage() {
+    printf("\nusage:\n");
+    printf("extract to DSDT.aml from AmiBoardInfo.efi:\n");
+    printf("AmiBoardInfoTool -a AmiBoardInfo.efi -d DSDT.aml\n\n");
+    printf("build AmiBoardInfoNew.efi using AmiBoardInfo.efi and DSDT.aml:\n");
+    printf("AmiBoardInfoTool -a AmiBoardInfo.efi -d DSDT.aml -o AmiBoardInfoNew.efi\n\n");
+}
 int main(int argc, char* argv[])
 {
     uint8_t ret;
@@ -424,10 +431,12 @@ int main(int argc, char* argv[])
 
     if (!amiPath) {
         printf("ERROR:missing -a command line option\n");
+        printUsage();
         return 1;
     }
     if (!dsdtPath) {
         printf("ERROR:missing -d command line option\n");
+        printUsage();
         return 1;
     }
 

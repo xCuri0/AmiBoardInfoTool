@@ -287,7 +287,11 @@ UINT8 injectDSDTintoAmiboardInfo(std::vector<unsigned char> ami, std::vector<uns
         _DInst *decomposed = (_DInst*)malloc(sizeof(_DInst) * MAX_INSTRUCTIONS);
         _DecodedInst *disassembled = (_DecodedInst*)malloc(sizeof(_DecodedInst) * MAX_INSTRUCTIONS);
         _DecodeResult res, res2;
-        _CodeInfo ci = { 0, 0, 0, 0, Decode64Bits, 0 };
+        #if _MSC_VER
+            _CodeInfo ci = { (_DecodeType)0, (_DecodeType)0, (_DecodeType)0, (_DecodeType)0, Decode64Bits, (_DecodeType)0 };
+        #else
+            _CodeInfo ci = { 0, 0, 0, 0, Decode64Bits, 0 };
+        #endif
         ci.codeOffset = HeaderNT->OptionalHeader.BaseOfCode;
         ci.codeLen = HeaderNT->OptionalHeader.SizeOfCode;
         ci.code = (const unsigned char*)&amiboardbuf[ci.codeOffset];

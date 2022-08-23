@@ -2,8 +2,9 @@
 # project specific logic here.
 #
 cmake_minimum_required (VERSION 3.8)
-project ("AmiBoardInfoTool")
 
+set(VCPKG_TARGET_TRIPLET "x86-windows-static")
+project ("AmiBoardInfoTool")
 set(CMAKE_CXX_STANDARD 17)
 
 # vcpkg dependencies

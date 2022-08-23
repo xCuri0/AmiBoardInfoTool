@@ -4,6 +4,8 @@
 #include <search.h>
 #include <algorithm>
 #include <fstream>
+#include <cstring>
+#include <iterator>
 #if _MSC_VER
 #include <intrin.h>
 #endif
@@ -32,7 +34,7 @@ UINT32 getUInt32(std::vector<unsigned char> buf, UINT32 start, bool fromBE)
 }
 
 int indexOf(std::vector<unsigned char> buf, const char* find) {
-    auto ret = std::search(buf.begin(), buf.end(), find, find + sizeof(find));
+    auto ret = std::search(buf.begin(), buf.end(), find, find + strlen(find));
 
     // if index is at end then not found
     if (ret != buf.end())
@@ -55,8 +57,8 @@ UINT8 extractDSDTfromAmiboardInfo(std::vector<unsigned char> amiboardbuf, std::v
     }
 
     offset = indexOf(amiboardbuf, DSDT_HEADER);
-    if (offset < 0) {
-        printf("ERROR: DSDT wasn't found in AmiBoardInfo");
+    if (offset <= 0) {
+        printf("ERROR: DSDT wasn't found in AmiBoardInfo\n");
         return ERR_FILE_NOT_FOUND;
     }
 
@@ -108,7 +110,7 @@ UINT8 injectDSDTintoAmiboardInfo(std::vector<unsigned char> ami, std::vector<uns
 
     offset = indexOf(ami, DSDT_HEADER);
     if (offset < 0) {
-        printf("ERROR: DSDT wasn't found in AmiBoardInfo");
+        printf("ERROR: DSDT wasn't found in AmiBoardInfo\n");
         return ERR_FILE_NOT_FOUND;
     }
 
@@ -191,7 +193,7 @@ UINT8 injectDSDTintoAmiboardInfo(std::vector<unsigned char> ami, std::vector<uns
     for (i = 0; i < HeaderNT->FileHeader.NumberOfSections; i++) {
 
         if (!strcmp((char*)&Section[i].Name, "")) // Give it a clear name
-            strcpy_s((char*)&Section[i].Name, strlen(EMPTY_SECTION) + 1, EMPTY_SECTION);
+            memcpy((char*)&Section[i].Name, EMPTY_SECTION, strlen(EMPTY_SECTION) + 1);
 
         printf(" - Section: %s\n", Section[i].Name);
 
@@ -285,7 +287,7 @@ UINT8 injectDSDTintoAmiboardInfo(std::vector<unsigned char> ami, std::vector<uns
         _DInst *decomposed = (_DInst*)malloc(sizeof(_DInst) * MAX_INSTRUCTIONS);
         _DecodedInst *disassembled = (_DecodedInst*)malloc(sizeof(_DecodedInst) * MAX_INSTRUCTIONS);
         _DecodeResult res, res2;
-        _CodeInfo ci = { (_DecodeType)0, (_DecodeType)0, (_DecodeType)0, (_DecodeType)0, Decode64Bits, (_DecodeType)0 };
+        _CodeInfo ci = { 0, 0, 0, 0, Decode64Bits, 0 };
         ci.codeOffset = HeaderNT->OptionalHeader.BaseOfCode;
         ci.codeLen = HeaderNT->OptionalHeader.SizeOfCode;
         ci.code = (const unsigned char*)&amiboardbuf[ci.codeOffset];
@@ -345,7 +347,7 @@ UINT8 injectDSDTintoAmiboardInfo(std::vector<unsigned char> ami, std::vector<uns
             return ERR_ERROR;
         }
 
-        printf("Patched %lu instructions\n", patchCount);
+        printf("Patched %u instructions\n", patchCount);
     }
 
     out.resize(offset);
@@ -417,11 +419,11 @@ int main(int argc, char* argv[])
     char* outPath = getCmdOption(argv, argv + argc, "-o");
 
     if (!amiPath) {
-        printf("ERROR:missing -a command line option");
+        printf("ERROR:missing -a command line option\n");
         return 1;
     }
     if (!dsdtPath) {
-        printf("ERROR:missing -d command line option");
+        printf("ERROR:missing -d command line option\n");
         return 1;
     }
 

@@ -364,3 +364,6 @@ FodyWeavers.xsd
 
 # idk why i have this
 *.ninja
+
+# cmake build folder
+build/

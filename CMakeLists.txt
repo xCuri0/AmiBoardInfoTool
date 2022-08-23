@@ -10,6 +10,12 @@ set(CMAKE_CXX_STANDARD 17)
 find_library(DISTORMLIB distorm)
 find_path(DISTORMH NAMES distorm.h)
 
+# search for alternate name distorm3 used on linux
+if (NOT DISTORMLIB OR NOT DISTORMH)
+    find_library(DISTORMLIB distorm3)
+    find_path(DISTORMH NAMES distorm.h PATH_SUFFIXES distorm3)
+endif()
+
 include_directories(${DISTORMH})
 
 add_executable (AmiBoardInfoTool "AmiBoardInfoTool.cpp" "include/peImage.h" "include/baseTypes.h" "include/common.h")
